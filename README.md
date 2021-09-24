@@ -1,6 +1,6 @@
 # Information Retrieval
 
-This repository contains my assignments and labs done in Information Retrieval (CS 6550) course at university of Utah in Fall 2021. 
+This repository contains my assignments and labs done in Information Retrieval (CS 6550) course at University of Utah in Fall 2021. 
 
 Codes are either in Python (both ipynb and py files) or Java. 
 
