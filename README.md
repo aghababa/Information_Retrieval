@@ -4,4 +4,4 @@ This repository contains my assignmets done in Information Retrieval (CS 6550) c
 
 Codes are either in Python (both ipynb and py files) or Java. 
 
-We have used Galago for IR tasks in this course (see: https://lemur.sourceforge.io/documentation/Galago%20Documentation.html).
+We have used Galago for IR tasks in this course (see: https://sourceforge.net/p/lemur/wiki/Galago%20Installation/ and https://lemur.sourceforge.io/documentation/Galago%20Documentation.html).
