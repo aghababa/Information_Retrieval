@@ -1,0 +1,202 @@
+\documentclass[11pt,a4paper,reqno]{amsart}
+\usepackage{amsmath, amsthm, amscd, amsfonts, amsthm, amssymb, graphicx}
+\usepackage[bookmarksnumbered, colorlinks, plainpages]{hyperref}
+\textwidth=15.5cm \textheight=22.000cm \topmargin=0.00cm
+\oddsidemargin=0.00cm \evensidemargin=0.00cm \headheight=14.4pt
+\headsep=1.2500cm \numberwithin{equation}{section}
+\hyphenation{semi-stable} \emergencystretch=12pt
+\usepackage[]{todonotes}
+
+
+\def\thefootnote{*}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lem}[theorem]{Lemma}
+\newtheorem{rem}{Remark}[section]
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{notation}
+\newtheorem{question}[theorem]{Question}
+
+
+\def\Hom{\mathop{\rm Hom}}
+\def\v{\mathop{\varphi}}
+
+
+\renewcommand{\baselinestretch}{1.27}
+
+
+%%% ----------------------------------------------------------------------
+
+%%% ----------------------------------------------------------------------
+
+
+\begin{document}
+
+
+\title[Assignment 1 Solution (Information Retrieval)]
+{Assignment 1 Solution (Information Retrieval)}
+
+
+\author[Hasan Pourmahmoodaghababa]{Hasan Pourmahmoodaghababa \\ UID: u1255635 \\ h.pourmahmoodaghababa@utah.edu}
+    \address{School of Computing, University of Utah, Utah, USA}
+\email{h.pourmahmoodaghababa@utah.edu}
+
+
+\maketitle
+
+\baselineskip = 8mm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Evaluation Metrics}
+
+\begin{question}%
+\end{question}
+\begin{itemize}
+\item List 1: $\frac{1}{3}(1+1+1+0)=\frac{3}{3} = 1$
+\item List 2: $\frac{1}{3}(1+0+0+0)=\frac{1}{3} = 0.3333$
+\item List 3: $\frac{1}{3}(1+0+\frac{2}{3}+0)=\frac{5}{9}=0.5556$
+\item List 4: $\frac{1}{3}(1+0+\frac{2}{3}+\frac{3}{4})=\frac{29}{36} = 0.8056$
+\item List 5: $\frac{1}{3}(0+\frac{1}{2}+\frac{2}{3}+0)=\frac{7}{18} = 0.3889$
+\end{itemize}
+
+
+\begin{question}%
+\end{question}
+
+$iDCG = 4+\frac{3}{\log_2 3}+\frac{1}{\log_2 4} = 6.3928$
+\begin{itemize}
+\item List 1: $DCG = 4+\frac{3}{\log_2 3}+\frac{1}{\log_2 4}+\frac{0}{\log_2 5} = 6.3928 \Longrightarrow nDCG = \frac{DCG}{iDCG} = \frac{6.3928}{6.3928}=1$
+\item List 2: $DCG = 3+\frac{0}{\log_2 3}+\frac{0}{\log_2 4}+\frac{0}{\log_2 5} = 3 \Longrightarrow nDCG = \frac{DCG}{iDCG} = \frac{3}{6.3928}= 0.4693$
+\item List 3: $DCG = 1+\frac{0}{\log_2 3}+\frac{3}{\log_2 4}+\frac{0}{\log_2 5} = 2.5 \Longrightarrow nDCG = \frac{DCG}{iDCG} = \frac{2.5}{6.3928}= 0.3911$
+\item List 4: $DCG = 4+\frac{0}{\log_2 3}+\frac{3}{\log_2 4}+\frac{1}{\log_2 5} = 5.9307 \Longrightarrow nDCG = \frac{DCG}{iDCG} = \frac{5.9307}{6.3928}= 0.9277$
+\item List 5: $DCG = 0+\frac{4}{\log_2 3}+\frac{3}{\log_2 4}+\frac{0}{\log_2 5} = 4.0237 \Longrightarrow nDCG = \frac{DCG}{iDCG} = \frac{4.0237}{6.3928}= 0.6294$
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Text Processing and Indexing}
+
+
+\begin{question}%
+\end{question}
+\begin{itemize}
+\item tokenization: We split the sentence by space and remove symbols like comma, dot, semicolon.
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+According & to & Wikipedia & information & technology & is & the & use 
+\\ \hline 
+of & computers & to & create & process & store & and & exchange
+\\ \hline 
+all & kinds & of & electronic & data & and & information &
+\\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\item normalization: We change all words to the same written shape like changing them to lowercases.  
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+according & to & wikipedia & information & technology & is & the & use 
+\\ \hline 
+of & computers & to & create & process & store & and & exchange
+\\ \hline 
+all & kinds & of & electronic & data & and & information &
+\\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\item stopping: We remove stop words like ``a, an, the, and, of, to, is, ...''. 
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+according & -- & wikipedia & information & technology & -- & -- & use  \\ \hline
+-- & computers & -- & create & process & store & -- & exchange \\ \hline
+ all & kinds & -- & electronic & data & -- & information & \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\item Krovetz stemming: We change all words to their ``algorithmic + dictionary-based'' versions, like  plural to singular and normalizing verb tense.
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+accord & -- & wikipedia & inform & technology & -- & -- & use  \\ \hline
+-- & computer & -- & create & process & store & -- & exchange \\ \hline
+ all & kind & -- & electronic & data & -- & inform & \\ \hline
+\end{tabular}
+\end{table}
+\end{itemize}
+I treated the words $\{\text{the, and, of, to, is}\}$ as stopping as they don't cary a useful information and are frequent. 
+
+
+
+
+\begin{question}%
+\end{question}
+\begin{itemize}
+\item Inverted index is efficient for big cuprous' queries where reading each document sequentially can be inefficient. 
+\item It depends on data. In fact if data we are exploring is not a big data, I assume there would be no considerable improvement; however, it would have a significant improvement in time efficiency for big data sets. For example, for a query to search within all webpages (like search in Google) inverted index has a dramatic improvement in the search system. 
+\end{itemize}
+
+
+
+
+\begin{question}%
+\end{question}
+\begin{itemize}
+\item 
+\begin{itemize}
+\item $x_d = \lfloor \log_2 2021 \rfloor = 10$ and so its unary code is $00000000001$,
+\item $x_r = x - 2^{\lfloor \log_2 2021 \rfloor } = 2021 - 2^{10} = 997$ which has the binary code $1111100101$,
+\item So the {\bf $\gamma$-code} of $2021$ is $00000000001,1111100101$. 
+\end{itemize}
+\item 
+\begin{itemize}
+\item $x_d = \lfloor \log_2 2021 \rfloor = 10$, 
+\item $x_{dd} = \lfloor \log_2(10+1) \rfloor = 3$, and so its unary code is $0001$,
+\item $x_{dr} = (x_d+1) - 2^{x_{dd}} = (10+1) - 2^3 = 3$ which has the binary code $11$, 
+\item $x_r = x - 2^{x_d} = 2021 - 2^{10} = 997$ with binary code $1111100101$,
+\item So the {\bf $\delta$-code} of $2021$ is $0001,11,1111100101$. 
+\end{itemize}
+\item
+\begin{itemize}
+\item $000010100$ is encoded in $\gamma$-code and we can decode it to get $2^4+2^2=20$.
+\item $001010101$ is encoded in $\delta$-code and we can decode it to get $2^4+(2^2+1)=21$. Calculations are as follows:
+
+$x_{dd} = (001)_{\text{unary}} = 2 \Rightarrow 1 = (01)_2 = x_{dr} = (x_d+1) - 2^{x_{dd}} = x_d + 1 - 2^2 \Rightarrow$ $x_d = 4 \Rightarrow x = x_r + 2^{x_d} = (0101)_2 + 2^4 = 5 + 2^4 = 21$. 
+\end{itemize}
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
