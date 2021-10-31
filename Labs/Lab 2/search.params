@@ -1,0 +1,9 @@
+{
+"index":"robust04-complete-index/",
+"mu": 1000,
+"lambda": 0.5,
+"startAt": 0,
+"requested": 1000,
+"queryFile":"query.titles.tsv",
+"rankFile": "ranklist.titles.tsv",
+}

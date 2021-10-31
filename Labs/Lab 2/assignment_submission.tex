@@ -1,0 +1,93 @@
+\documentclass[11pt]{article}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
+\newtheorem{define}{Definition}
+%\newcommand{\Z}{{\mathbb{Z}}}
+%\usepackage{psfig}
+\usepackage{tikz}
+\usetikzlibrary{arrows, automata}
+\oddsidemargin=0.15in
+\evensidemargin=0.15in
+\topmargin=-.5in
+\textheight=9in
+\textwidth=6.25in
+\usepackage{latexsym,bm}
+\usepackage{amsmath}
+\usepackage{amsfonts}%for math
+\usepackage{graphicx}%for eps
+\usepackage{url}
+
+
+\newif\ifgrading
+
+\gradingtrue
+%\gradingfalse
+
+\begin{document}
+\input{preamble.tex}
+
+\assignment{2}{}{u1255635}{Hasan Pourmahmoodaghababa}
+
+\baselineskip = 5mm
+
+%\input{answers}
+
+\section*{Task 1.}%
+
+The values I got are: 
+
+\begin{itemize}
+\item with dirichelet smoothing and krovetz stemming: 0.250
+\item with dirichelet smoothing but without krovetz stemming:0.225
+\item with jm smoothing and krovetz stemming: 0.228
+\item with jm smoothing but without krovetz stemming:0.203
+\item without smoothing with krovetz stemming: 0.159
+\item without smoothing but without krovetz stemming: 0.131 
+\end{itemize}
+
+I learnt smoothing improves MAP by a significant amount in general. Krovetz stemming also improves MAP in a fair amount but not as significant as smoothing. However, different smoothing techniques have different degrees of improvement. For example, in this task, we observed that dirichlet smoothing improves MAP more than jm smoothing. One possible reason is the coefficient $\lambda$ in jm smoothing is fixed for all documents in the corpus but the dirichlet smoothing considers $\lambda$ according to the document size for each document (i.e. $\lambda$ differs for each document) and so it is more effective. 
+
+\section*{Task 2.}
+ 
+\begin{itemize}
+\item[(i)] MAP value for RM1 with 25 top ranked docs and 100 top feedback terms: {\bf 0.193}
+
+\item[(ii)] MAP value for RM3 with 25 top ranked docs, 100 top feedback terms and 0.3 for the weight of the original query: {\bf 0.293}
+
+\item[(iii)] MAP value for RM3 with 10 top ranked docs, 20 top feedback terms and 0.3 for the weight of the original query: {\bf 0.271}
+
+\item[(iv)] MAP value for RM3 with 25 top ranked docs, 100 top feedback terms and 0.7 for the weight of the original query: {\bf 0.268}
+\end{itemize}
+
+From these results (specially from (i), (ii) and (iii)) first I learnt that RM3 works better than RM1 as the MAP is significantly higher. Comparing (ii) and (iii) shows that using more top ranked docs and more top feedbacks provides a higher performance (i.e. improves overall precision). Lastly, looking at (ii) and (iv) we observe that the lower weight for the weight of the original query performs better than bigger weights. This is also shown in comparing (iii) and (iv); even though smaller number of top ranked docs and top feedbacks are used in (iii) than (iv), it performed a bit better as the weight for the weight of the original query in (iii) was smaller than the one for (iv).
+
+\section*{Question 3.}%
+
+
+The idea of the Mixture model is to linearly combine the probability of the term generated from the language model of the feedback document ($F$) and the probability of the term generated from the collection ($C$), that is, 
+$$p(t) = (1 - \lambda) p(t| \theta_F) + \lambda p(t|\theta_C).$$
+The EM algorithm has two steps, namely E-step and M-step, which will be updated iteratively. 
+
+The E-step is calculating some latent variables based on data, which here for a latent random variable $Z_t$ is 
+$$p(z_t=1) = \frac{(1 - \lambda) p(t| \theta_F)}{(1 - \lambda) p(t| \theta_F) + \lambda p(t|\theta_C)}.$$
+The M-step is maximizing the expectation of the probabilities that we have got from E-step. It turns out that after maximizing the expectation we get the following formula to calculate the probability of the term generated from the language model of the feedback document:
+$$p(t| \theta_F) = \frac{count(t, F) p(z_t=1)}{\sum_{t' \in V} count(t', F) p(Z_{t'}=1)}.$$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
