@@ -68,15 +68,18 @@ Lastly, smoothing methods are simple enough to use.
 \section*{Question 4.}%
 We know that log-likelihood without JM smoothing uses $p_{MLE}(t| \theta_d) = \frac{count(t,d)}{|d|}$ and so it is 
 $$\log p_{MLE}(q| \theta_d) = \sum_{t \in q} \log p_{MLE}(t| \theta_d) = \sum_{t \in q} \log \Big(\frac{count(t,d)}{|d|} \Big) = \log(\frac{4}{23}) + \log(\frac{1}{23}) + \log(\frac{0}{23}) = - \infty,$$
-which, I guess, it means that this document is not considered relevant for that query as score is $-\infty$. 
+which, I guess, it means that this document is not considered relevant for that query as score is $-\infty$. Also, the likelihood is $e^{- \infty}= 0$.
 
 However, the log-likelihood with JM smoothing utilizes 
 $$p_{JM}(t| \theta_d) = \lambda \, p_{MLE}(t| d) + (1- \lambda) \, p_{MLE}(t | C) = \lambda \, \frac{count(t, d)}{|d|} + (1 - \lambda) \, \frac{count(t, C)}{|C|},$$ 
 (here $\lambda = 0.5$) and thus log-likelihood with JM smoothing is 
 $$\begin{array}{ll} \vspace{2mm}
-\log p_{JM}(q| \theta_d) & = \sum_{t \in q} \log p_{JM}(t| \theta_d) = \frac{1}{2} \sum_{t \in q}  \log\big(\frac{count(t, d)}{|d|} + \frac{count(t, C)}{|C|}\big) \\ \vspace{1mm} &
-=\frac{1}{2} \big(\log(\frac{4}{23} + \frac{100}{200}) + \log(\frac{1}{23} + \frac{40}{200}) + \log(\frac{0}{23} + \frac{60}{200}) \big) = -1.5057.
+\log p_{JM}(q| \theta_d) & = \sum_{t \in q} \log p_{JM}(t| \theta_d) = \sum_{t \in q}   \log(\frac{1}{2}) + \log\big(\frac{count(t, d)}{|d|} + \frac{count(t, C)}{|C|}\big) \\ \vspace{1mm} &
+=3 \log(\frac{1}{2}) + \log(\frac{4}{23} + \frac{100}{200*200}) + \log(\frac{1}{23} + \frac{40}{200*200}) + \log(\frac{0}{23} + \frac{60}{200*200}) \\ \vspace{1mm} & 
+= -13.4294.
 \end{array}$$
+So the likelihood is $e^{-13.4294}= 0.00000147$.
+
 From this example we can learn that without smoothing if a query has at least one term that is not in a document, the log-likelihood will assign $-\infty$ score to that document and so it will not be retrieved as a relevant document to that query. Nevertheless, with smoothing, the model partially considers that term (assuming it is in the corpus) and so assigns a positive probability for that term. So it never will pass 0 to the $\log$ function and as a result no document will get a $-\infty$ as a score. Therefore, all the documents will get a chance to be retrieved even though they do not consist some terms from a query. 
 
 
@@ -89,6 +92,7 @@ Dirichlet prior smoothing is expected to perform best and additive smoothing is 
 \section*{Question 6.}%
 
 {\bf First part:}
+The order  for $\alpha \text{-iDCG}$ that I have chosen is $d_8, d_3, d_5, d_1, d_6, d_2, d_4, d_7$.
 
 $\alpha \text{-iDCG} = 4+\frac{2.5}{\log_2 3}+\frac{1}{\log_2 4}+\frac{0.5}{\log_2 5}+\frac{0.25}{\log_2 6} = 6.3894$
 \begin{itemize}
