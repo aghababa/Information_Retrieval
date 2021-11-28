@@ -1,0 +1,123 @@
+\documentclass[10pt, twocolumn]{myclass}
+
+\usepackage{amssymb,amsmath,amsfonts,pdfpages,color, url}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{rem}{Remark}[section]
+\newtheorem{addendum}[theorem]{Addendum}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{exa}{Example}[section]
+\newtheorem{Notation}[theorem]{Notation}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{convention}[theorem]{Convention}
+\newtheorem{Assumption}[theorem]{Assumption}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+
+\def\dis{\mathop{\displaystyle}}
+\def\Train{\mathop{\rm Train}}
+\def\Test{\mathop{\rm Test}}
+\newcommand{\bb}{\ensuremath{{\rm{\bf b}}}}
+\newcommand{\w}{\ensuremath{{\rm{\bf w}}}}
+\def\Gsim{\mathop{\Gamma}}
+
+%%% ----------------------------------------------------------------------
+
+
+
+\begin{document}
+
+
+\title{Efficient Trajectory Retrieval}
+
+\author{Sole Team Member: Hasan Pourmahmoodaghababa \\ %University of Utah \\ 
+\texttt{uID: u1255635}}
+
+
+\baselineskip = 4mm
+
+\maketitle
+
+\section{The problem} 
+
+A spatial trajectory is a sequence of waypoints $T=\{(x_1, y_1), \ldots, (x_n, y_n)\}$, where $x_i, y_i$ show the latitude and longitude of a moving object. Mostly there is a time stamp attached to each waypoint too. %In most datasets there is a time stamp attached to each waypoint and so we can say $T=\{(x_1, y_1, t_1), \ldots, (x_n, y_n, t_n)\}$ is a trajectory, where $t_i$ shows the time that $T$ was at point $(x_i, y_i)$ at that time. 
+The problem I am going to address in this project is trajectory similarity problem from information retrieval perspective. Thus the task is: given a query trajectory we should return the most similar trajectory from data to the query. This is somehow a document-term task. I will consider two types of queries:
+\begin{itemize}
+\item First type is a pair $q=(T, k)$, where $T$ is a trajectory and $k$ is an integer. The search machine should return $k$ most similar trajectories to $T$ in an ordered way. \vspace{-1mm}
+\item The second kind is a pair $q=(T, r)$, where $T$ is a trajectory and $r$ is a positive real number showing the range we are willing to get an ordered list of trajectories that lie in distance at most $r$ from $T$ in data.
+\end{itemize}
+%The trajectory similarity problem has many applications in different fields. For example, a trajectory can show the spatial location of a moving object like vehicles, humans and animals. Time series are another sort of examples. So, studying trajectory similarity problem one can extract users' behavior, detect transportation modes, do route extraction task, and so on. Generically, however, this is a difficult problem because of the complexity of the shape of trajectories. Indeed, famous distances defined on trajectories, such as Fr\'echet, discrete Fr\'chet and dynamic time warping, are usually expensive to utilize as they suffer from quadratic complexity in terms of the number of waypoints of trajectories. 
+
+
+\section{My approach}
+
+I will use the approach studied in the research paper \cite{pap2008}, which is an information retrieval perspective; in fact, building a vector space model. In the following I have listed the paradigm I have in my mind:
+\begin{enumerate}
+\item 
+First I will calculate the pairwise distance of all trajectories in data employing a famous distance in order to get a ground truth ranked list for each trajectory in terms of proximity. \vspace{-1mm}
+\item 
+I will use all data points as a query for evaluation purpose. \vspace{-1mm}
+\item
+Assuming the dataset lives in a rectangular bounded region $R$, we will decompose $R$ into a large number of grids, say $N$. Then we will map every trajectory in our training data to an $N$-dimensional vector both in binary and frequency-type way. \vspace{-1mm}
+\item 
+As trajectories pass through a small number of grids, our representation of a trajectory in the latent space would be sparse (think of terms in a document versus corpus) and so it seems reasonable to reduce dimension in some way. \vspace{-1mm}
+\item 
+I will use a technique suggested in \cite{pap2008} to do a dimensionality reduction and will preserve the operator as a matrix in order to apply for query trajectories too. I will also try to apply other dimensionality reduction techniques like PCA or LDA. \vspace{-1mm}
+\item
+Euclidean distance or cosine distance will be used as a similarity measure to create ranked lists as well as for comparing the mapped query with our index.  \vspace{-1mm}
+\item
+Depending on time, I would try a landmark-based featurization method for trajectories to map trajectories to a low dimensional Euclidean space and do the mentioned tasks for this representation as well and compare the performance with above vectorization method. I think this will work a bit worse but more efficiently as we will not need to calculate a huge dimensional vector for a trajectory and then do a dimensionality reduction. Indeed, the landmark-based vectorization will efficiently map each trajectory to a low dimensional vector, say 20-dimensional, and will do the same for a query in linear time in terms of the number of waypoints of the trajectory. 
+\end{enumerate}
+
+
+
+\section{Datasets}
+
+I will use 3 trajectory data sets for evaluation: Car-Bus dataset and Character Trajectories dataset from UCI Machine Learning Repository, and Geolife Trajectory data set (a fairly big data) released by Microsoft.
+
+%\url{https://archive.ics.uci.edu/ml/datasets/GPS+Trajectories}.
+
+%There are 87 car and 76 bus trajectories in this data, which are recorded in Aracuja, Brazil. 
+%Character Trajectories Data Set from UCI Machine Learning Repository: \url{https://archive.ics.uci.edu/ml/datasets/Character+Trajectories}.
+
+%This data consists of handwritten characters captured using a WACOM tablet. There are 20 characters and each includes between 100 and 200 trajectories. I will use some of the characters. 
+%\url{https://msropendata.com/datasets/d19b353b-7483-4db7-a828-b130f6d1f035}.
+
+%This big dataset, which was released by Microsoft in 2012, consists of trajectories of 182 users from 2007 to 2012. In total there are 17,621 trajectories which are mostly recorded in Beijing, China. 69 user have determined their transportation modes too. In addition to applying the whole dataset, depending on time, I will try to come up with an idea in order to be able to  detect transportation modes from information retrieval perspective as well. 
+
+%Needless to say that in all data sets I will do some preprocessing/cleaning like removing trajectories with less that 10 waypoints. 
+
+
+
+\section{Contribution}
+
+My contributions are:
+\begin{itemize}
+\item Using different dimensionality reduction techniques, \vspace{-1mm}
+\item Apply a kernel-based similarity measures in addition to cosine and dot product similarity measures, \vspace{-1mm}
+\item Using different datasets as a benchmark, \vspace{-1mm}
+\item Utlizing binary vectorization of trajectories, \vspace{-1mm}
+\item Using term-frequency type of trajectory vectorization, \vspace{-1mm} %(not weighting in terms of time a trajectory appears in a grid cell), 
+\item Applying dynamic time warping as a ground truth distance %(the author in the reference has used the same Euclidean or cosine distance which they use for the task too, which I think is unfair and inappropriate), 
+\item Using landmark-based technique (if time allows). 
+%\item Detecting transportation modes from information retrieval perspective (if time allows and if I come up with an idea).
+\end{itemize}
+
+
+
+\section{Evaluation}
+
+Evaluation would be through effectiveness and efficiency. Therefore, the model and performance would be judged by computing accuracy, recall, average precision and normalized discounted cumulative gain, for example. My plan is to do these evaluation at least on 2 datasets. 
+
+
+
+\section{Implimentation}
+I will implement the whole project in Python. 
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
