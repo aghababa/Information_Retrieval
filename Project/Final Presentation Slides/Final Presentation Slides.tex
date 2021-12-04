@@ -1,0 +1,378 @@
+\documentclass{beamer}
+\usepackage{amssymb,amsmath,amsfonts,pdfpages,color, url}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\setbeamertemplate{navigation symbols}{}
+\usetheme{Montpellier}
+
+\setbeamertemplate{footline}[page number]
+
+
+\def\dis{\mathop{\displaystyle}}
+\def\argmin{\mathop{\rm argmin}}
+
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\jeff}[1]{{\color{blue}$\langle$Jeff: #1$\rangle$}}
+\newcommand{\dgen}{\ensuremath{\mathtt{d}}}
+
+
+
+\title{Efficient Trajectory Retrieval}
+\author{By Hasan Pourmahmood}
+\date{December 6, 2021}
+
+\begin{document}
+
+\frame{\titlepage}
+
+
+\section{Motivation}
+
+\begin{frame} 
+\frametitle{Trajectory}
+\begin{block}{}
+A spatial trajectory (also called a piece-wise linear curve) is a sequence of waypoints along with a time stamp, i.e. 
+$$T=\{(x_1, y_1, t_1), \ldots, (x_n, y_n, t_n)\}.$$
+\begin{figure}[h] 
+\includegraphics[width=0.8 \textwidth]{trajectory} 
+\end{figure}  \vspace{-1mm}
+\end{block} 
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{}
+\begin{block}{Popular Distances}
+\begin{itemize}
+\item [$\blacktriangleright$] Dynamic Time Warping distance (DTW)
+
+\item [$\blacktriangleright$] Fr\'echet distance 
+
+\item [$\blacktriangleright$] Discrete Fr\'echet distance \pause 
+\end{itemize}
+Complexity: {\color{orange} Quadratic in number of waypoints $O(n^2)$}.
+\end{block} \pause
+
+\begin{block}{Queryies}
+\begin{itemize}
+\item {\color{blue} $k$-NN queries:} Find $k$ nearest trajectories from data to a given query trajectory $Q$.
+\item {\color{blue} Range queries:} Find all trajectories within distance $r$ from data to a given query trajectory $Q$.
+\end{itemize}
+\end{block} \pause
+
+\begin{block}{Applications}
+{\small Route extraction, route recommendation, ...}
+\end{block}
+\end{frame}
+
+
+
+\section{Novelty and Related work}
+
+
+\begin{frame}
+\frametitle{Approach and Related Work}  \vspace{-2mm}
+\begin{block}{Related work}  \vspace{2mm}
+We are going to apply a similar method introduced in the following paper: \vspace{3mm}
+
+{\color{magenta} \small Apostolos N. Papadopoulos. Trajectory retrieval with latent semantic analysis. In SAC08 March 16--20, pages 1089--1094.} \vspace{2mm} \pause
+\end{block}
+\begin{block}{Novelty}  \vspace{2mm}
+However, among other things, we will do some modifications and apply novel vectorization techniques. Moreover, we will evaluate our approach on 3 real world datasets not only on Precision and Recall but also based on MAP and nDCG which will be adapted from their definitions in IR on text data. 
+\end{block}
+\end{frame}
+
+
+
+
+\section{Information Retrieval Approach}
+
+
+\begin{frame}
+\frametitle{Vector space model using grid structure}  \vspace{-9mm}
+\begin{block}{} 
+\begin{figure}[h] 
+\includegraphics[width=0.6 \textwidth]{grid} 
+\end{figure}  \vspace{-3mm} \pause
+
+\begin{itemize}
+\item {\bf Vocabulary:} the whole set of grids $\{c_1, \ldots, c_n\}$
+\item {\bf Document:} trajectory
+\item {\bf Term:} a grid
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Vector space model using grid structure}  \vspace{-9mm}
+\begin{block}{} 
+\begin{figure}[h] 
+\includegraphics[width=0.6 \textwidth]{grid} 
+\end{figure}  \vspace{-4mm} 
+
+{\color{magenta} Binary representation:} 
+
+$\tilde{T} = [1,1,0,0,0,0,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,0,0,0,0]$  \vspace{1mm} \pause
+
+{\color{magenta} Frequency representation:} 
+
+$\tilde{T}= [1,1,0,0,0,0,1,1,1,0,0,1, \underbrace{2, 2}_{\color{magenta} 13, 14},1,0,1,1,1,0,0,0,0,0,0]$
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Grid aggregate distance (GAD)} 
+\begin{block}{} 
+Consider a cell similarity matrix $C_{n \times n} = (sim(c_i, c_j))_{i,j=1}^n$ ($c_i$ is the center of cell $i$), like 
+\[
+{\color{orange} sim(c_i, c_j) = e^{-\|c_i-c_j\|^2/\sigma^2}} \pause
+\] 
+which is applied in experiments. Then
+\[
+{\color{orange} GAD(T_1, T_2) = \sqrt{(\tilde{T}_1 - \tilde{T}_2)^t \cdot C \cdot (\tilde{T}_1 - \tilde{T}_2)}} \pause
+\] 
+
+{\color{magenta} Problem:} The number of grids $n$ is high (in experiments it is set to 2500), and so GAD computation would be inefficient. \vspace{3mm} \pause
+
+{\color{magenta} How to address this problem?}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+\begin{block}{} 
+\frametitle{Dimensionality reduction technique}  
+
+\begin{itemize}
+\item Decompose $C$ to {\color{orange} $C = P \Delta P^t$},  \vspace{1mm} \pause
+\item Set $\tilde{\tilde{D}} = \Delta^{1/2} P^t \tilde{D}$, where $\tilde{D}$ is the binary/frequency-type representation of data $D$, \pause  \vspace{1mm}
+\item Use {\color{orange} SVD} for $\tilde{\tilde{D}} $ to reduce the dimension (in experiments 2500 is reduced to 25 and 100), \pause  \vspace{1mm}
+\item This reduced dimensional data would be treated as our {\color{orange} index}, \pause  \vspace{1mm}
+\item Employ {\color{orange} Euclidean distance} for new short vectors as an approximation for GAD between trajectories, \pause  \vspace{1mm}
+\item When a query comes, do the same and consult the index to retrieve appropriate trajectories.
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+
+
+\section{Experiments and Evaluation}
+
+\begin{frame}
+\frametitle{Data Sets} 
+\begin{block}{} \vspace{-8mm}
+\begin{table}[!htbp]
+{\footnotesize
+\centering
+\begin{tabular}{rccccc}
+ 	{\bf Data } 	&  	{\bf Size}  	& 	{\bf Cleaned}  	& {\bf Sample}	& {\bf Grids}	&	{\bf Reduced dim}	\\ \midrule
+ 	Car-Bus   		& 	163   	& 	105 			&	105		&	2500		&	25	\\ \midrule
+	Characters   	& 	2858	    	& 	2858 		&	300		&	2500		&	25	\\ \midrule
+ 	Geolife  		&   	17621  	&      14187		&	1000		&	2500		&	100	\\ \bottomrule 
+\end{tabular} 
+\caption{\footnotesize Overview of data sets}
+\label{table: datasets} 
+}
+\end{table} \vspace{-6mm} \pause
+
+\begin{figure}[h] 
+\includegraphics[width=0.28 \textwidth]{car-bus} 
+\includegraphics[width=0.3 \textwidth]{Geolife}
+\includegraphics[width=0.35 \textwidth]{Characters-2-fig}
+\caption{Car-Bus (left), Geolife (middle), Characters: letters n, u (right).}
+\label{characters}
+\end{figure}
+\end{block}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%% Geolife
+
+\subsection{Geolife}
+
+\begin{frame}
+\frametitle{kNN Queries (Geolife)} 
+\begin{block}{} \vspace{-3mm}
+\begin{table}[!htbp]
+{\footnotesize
+\centering
+\begin{tabular}{rcccc}
+ 	{\bf k } 	& {\bf Precision/Recall}	&	{\bf MAP}	 & {\bf nDCG@5}	& {\bf nDCG@10} \\ \midrule
+ 	 5   		& 	0.8676   			&	0.8632	& 0.9182		& 0.9443	\\ \midrule
+	10   		& 	0.8921    		 	&	0.8751	& 0.7822		& 0.9394	\\ \midrule
+ 	20  		&   	0.9074   			&	0.8904	& 0.5823  		& 0.7989	\\ \bottomrule\end{tabular} 
+\caption{\footnotesize Performance with binary representation} \vspace{3mm}
+
+\centering
+\begin{tabular}{rcccc}
+ 	{\bf k } 	& {\bf Precision/Recall}	&	{\bf MAP}	 & {\bf nDCG@5}	& {\bf nDCG@10} \\ \midrule
+ 	 5   		& 	0.9480   		 	&	0.9597	 & 0.9822			& 0.9930	\\ \midrule
+	10   		& 	0.9590    		 	&	0.9577	 & 0.8233			& 0.9886	\\ \midrule
+ 	20  		&   	0.9653   			&	0.9604	 & 0.6029  		& 0.8330	\\ \bottomrule
+\end{tabular} 
+\caption{\footnotesize Performance with frequency representation}
+\label{table: Geolife binary} 
+}
+\end{table}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Range Queries (Geolife)} 
+\begin{block}{} \vspace{-3mm}
+\begin{table}[!htbp]
+{\footnotesize
+\centering
+\begin{tabular}{rccccc}
+ 	{\bf r } 	& {\bf Precision}& {\bf Recall}	&	{\bf MAP}	 & {\bf nDCG@5}	& {\bf nDCG@10} \\ \midrule
+  	0.001   	& 	0.9275    	& 	0.9549 	&	0.8116	& 0.7260		& 0.6559	\\ \midrule
+	0.005   	& 	0.8896    	& 	0.9023 	&	0.2025	& 0.8893		& 0.8952	\\ \midrule
+ 	0.01	 	&   	0.8883   	&      0.8892	&	0.0376	& 0.9182  		& 0.9390	\\ \bottomrule
+\end{tabular} 
+\caption{\footnotesize Performance with binary representation} \vspace{3mm}
+
+\centering
+\begin{tabular}{rccccc}
+ 	{\bf r } 	& {\bf Precision}& {\bf Recall}	&	{\bf MAP}	 & {\bf nDCG@5}	& {\bf nDCG@10} \\ \midrule
+  	0.001   	& 	0.9990    	& 	1		&	0.9990	 & 0.4906			& 0.3367	\\ \midrule
+	0.005   	& 	0.9894    	& 	1		&	0.9973	 & 0.5291			& 0.3748	\\ \midrule
+ 	0.01	 	&   	0.9765   	&      0.9978	&	0.9582	 & 0.5735  		& 0.4276	\\ \bottomrule
+\end{tabular} 
+\caption{\footnotesize Performance with frequency representation}
+\label{table: Geolife multipass} 
+}
+\end{table}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Precision} 
+\begin{block}{} \vspace{-1cm}
+\begin{figure}[h] 
+\includegraphics[width=1 \textwidth]{Precision-Geolife} 
+\end{figure}
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{MAP} 
+\begin{block}{} \vspace{-1cm}
+\begin{figure}[h] 
+\includegraphics[width=1 \textwidth]{MAP-Geolife}
+\end{figure}
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{nDCG} 
+\begin{block}{} \vspace{-1cm}
+\begin{figure}[h] 
+\includegraphics[width=1 \textwidth]{nDCG-Geolife} 
+\end{figure}
+\end{block}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Conclusion}
+
+\begin{frame}
+\frametitle{Conclusion} 
+\begin{block}{}
+\begin{itemize}
+\item LSI technique for trajectory retrieval is a quite {\color{orange} successful} one, \pause
+\item The {\color{orange} term-frequency-type} representation tended to perform better in terms of {\color{orange} AP, Recall and MAP}, \pause
+\item The {\color{orange} binary} representation tended to perform better in terms of {\color{orange} nDCG} for range queries, \pause
+\item LSI technique works better with GAD in comparison to DTW distance, \pause
+\item Increasing the number of grids leads to a better performance, \pause
+\item Increasing the number of dimensions in dimensionality reduction technique leads to a better performance.
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Contributions}
+
+\begin{frame}
+\frametitle{My Contributions} 
+\begin{block}{}
+\begin{itemize}
+\item Applying a {\color{orange} kernel-based} similarity measure, \vspace{1mm}
+\item Using {\color{orange} 3} different datasets as benchmark including a big data, \vspace{1mm}
+\item Utlizing {\color{orange} binary} vectorization of trajectories, \vspace{1mm}
+\item Using {\color{orange} term-frequency} type trajectory vectorization, \vspace{1mm}
+\item Applying {\color{orange} DTW} as a ground truth distance, \vspace{1mm}
+\item Adjusting the definition of {\color{orange} Precision, Recall, MAP and nDCG} for trajectories, \vspace{1mm}
+\item Creating a {\color{orange} user-friendly interactive search tool} for kNN and range queries of trajectories. 
+\end{itemize}
+
+\end{block}
+\end{frame}
+
+
+
+
+\section*{Questions}
+{\color{white}1}
+\begin{center} 
+{\huge \color{magenta}{\sc \vspace{3cm} Questions?}}
+\end{center}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
